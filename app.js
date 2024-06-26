@@ -1,10 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-
-// Load environment variables
-dotenv.config();
+const authRoutes = require('./routes/auth');
 
 const app = express();
 
@@ -13,13 +10,16 @@ app.use(cors());
 app.use(express.json());
 
 // Database connection
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+const MONGODB_URI = 'mongodb+srv://eklavya0304:TapWgsAoFhRsfXWO@cluster0.1gx0uav.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+
+mongoose.connect(MONGODB_URI);
+
 mongoose.connection.once('open', () => {
   console.log('MongoDB database connection established successfully');
 });
+
+// Routes
+app.use('/api/auth', authRoutes);
 
 // Basic route
 app.get('/', (req, res) => {
