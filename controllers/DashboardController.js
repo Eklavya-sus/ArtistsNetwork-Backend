@@ -1,22 +1,21 @@
-import ItemToSell from "../models/SellModel.js";
+import Artwork from "../models/ArtworkModel.js";
 
-const dashboardListItems = async (req, res) => {
+const dashboardListArtworks = async (req, res) => {
   try {
-    const items = await ItemToSell.aggregate([
+    const artworks = await Artwork.aggregate([
       {
         $project: {
-          itemName: 1,
-          itemCost: 1,
+          title: 1,
           userName: 1,
-          image: { $arrayElemAt: ["$images", 0] }
+          image: 1
         }
       }
     ]);
-    return res.status(200).send(items);
+    return res.status(200).send(artworks);
   } catch (error) {
     console.error("Error:", error);
     return res.status(500).send("Internal server error");
   }
 };
 
-export { dashboardListItems };
+export { dashboardListArtworks };

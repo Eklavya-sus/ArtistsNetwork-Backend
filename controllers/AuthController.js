@@ -1,5 +1,6 @@
 import User from "../models/UserModel.js";
 import bcrypt from "bcryptjs";
+import jwt from 'jsonwebtoken';
 
 const hashPassword = (pass) => {
   const saltRounds = 10;
@@ -42,51 +43,58 @@ const signup = async (req, res) => {
     await newUser.save();
     console.log("New user saved successfully");
 
+    // Generate JWT token for the new user
+    const token = jwt.sign(
+      { userId: newUser._id, email: newUser.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
     res.status(201).send({
       message: "Signup successful.",
+      token: token,
+      name: newUser.name
     });
   } catch (err) {
     console.error("Error in signup:", err);
-    console.error("Error stack:", err.stack);
     res.status(500).send({ 
       message: "Signup failed. Please try again later.", 
-      error: err.message,
-      stack: err.stack
+      error: err.message
     });
   }
 };
 
 const login = async (req, res) => {
   const { email, password } = req.body;
-  console.log(req.body);
 
-  const existingUser = await User.findOne({ email });
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
 
-  if (!existingUser) {
-    console.log("User does not exist");
-    return res.status(400).send({
-      message: "User does not exist. Please signup.",
-      errorName: "User does not exist",
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    const token = jwt.sign(
+      { userId: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    console.log("Generated token:", token); // Add this line for debugging
+
+    res.json({
+      message: "Login successful",
+      name: user.name,
+      token: token
     });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ message: "Server error" });
   }
-
-  const checkPassword = bcrypt.compareSync(password, existingUser.password);
-
-  if (!checkPassword) {
-    console.log("Password is incorrect");
-    return res.status(400).send({
-      message: "Password is incorrect. Please try again.",
-      errorName: "Password is incorrect",
-    });
-  }
-
-  // Login successful
-  console.log("Login successful");
-  console.log(existingUser);
-  res.status(200).send({
-    message: "Login successful.",
-    name: existingUser.name,
-  });
 };
 
 export { signup, login };
