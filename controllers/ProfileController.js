@@ -3,10 +3,13 @@ import Artwork from "../models/ArtworkModel.js";
 
 const ProfileDetails = async (req, res) => {
   try {
-    const { token } = req.body; // Access the token from the request body
-    const user = await User.findOne({
-      token: token, // Find the user by token
-    }).exec();
+    const { name } = req.body; // Access the username from the request body
+    const user = await User.findOne({ name }).exec();
+    
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+    
     return res.status(200).send(user);
   } catch (error) {
     console.error("Error:", error);
@@ -16,21 +19,11 @@ const ProfileDetails = async (req, res) => {
 
 const ArtworksListedByUser = async (req, res) => {
   try {
-    const { token } = req.body; // Access the token from the request body
-    const artworks = await Artwork.aggregate([
-      {
-        $match: {
-          userToken: token, // Filter by userToken instead of token
-        }
-      },
-      {
-        $project: {
-          title: 1,
-          userName: 1,
-          image: 1
-        }
-      }
-    ]);
+    const { name } = req.body; // Access the username from the request body
+    const artworks = await Artwork.find({ userName: name })
+      .select('title userName image')
+      .exec();
+    
     return res.status(200).send(artworks);
   } catch (error) {
     console.error("Error:", error);

@@ -1,6 +1,5 @@
 import User from "../models/UserModel.js";
 import bcrypt from "bcryptjs";
-import jwt from 'jsonwebtoken';
 
 const hashPassword = (pass) => {
   const saltRounds = 10;
@@ -43,16 +42,8 @@ const signup = async (req, res) => {
     await newUser.save();
     console.log("New user saved successfully");
 
-    // Generate JWT token for the new user
-    const token = jwt.sign(
-      { userId: newUser._id, email: newUser.email },
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' }
-    );
-
     res.status(201).send({
       message: "Signup successful.",
-      token: token,
       name: newUser.name
     });
   } catch (err) {
@@ -78,18 +69,9 @@ const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const token = jwt.sign(
-      { userId: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' }
-    );
-
-    console.log("Generated token:", token); // Add this line for debugging
-
     res.json({
       message: "Login successful",
-      name: user.name,
-      token: token
+      name: user.name
     });
   } catch (error) {
     console.error("Login error:", error);
