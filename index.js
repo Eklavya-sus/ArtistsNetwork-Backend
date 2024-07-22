@@ -6,9 +6,15 @@ import "dotenv/config.js";
 
 const app = express();
 const PORT = 4000;
-const MONGODB_URI = process.env.MONGODB_CONNECTION_STRING;
+const MONGODB_URI = "mongodb+srv://eklavya0304:TapWgsAoFhRsfXWO@cluster0.1gx0uav.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
-app.use(cors());
+app.use(cors(
+  {
+      origin: ["https://artistnetwork.vercel.app/"],
+      methods: ["POST", "GET"],
+      credentials: true
+  }
+));
 app.use(express.json());
 app.use("/", routes);
 
@@ -23,5 +29,3 @@ mongoose
   .catch((error) => {
     console.error("MongoDB connection error:", error);
   });
-
- 
