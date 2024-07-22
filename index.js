@@ -10,8 +10,8 @@ const MONGODB_URI = "mongodb+srv://eklavya0304:TapWgsAoFhRsfXWO@cluster0.1gx0uav
 
 app.use(cors(
   {
-      origin: ['http://localhost:5173','https://artistnetwork.vercel.app/'],
-      methods: ["POST", "GET"],
+      origin: ['https://artistnetwork.vercel.app', 'http://localhost:5173'],
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
       credentials: true
   }
 ));
