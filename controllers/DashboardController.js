@@ -1,8 +1,17 @@
 import Artwork from "../models/ArtworkModel.js";
 
-const dashboardListArtworks = async (req, res) => {
+const listArtworksByTag = async (req, res) => {
   try {
+    const { tags } = req.query;
+
+    const tagsArray = Array.isArray(tags) ? tags : tags.split(',');
+
     const artworks = await Artwork.aggregate([
+      {
+        $match: {
+          tags: { $in: tagsArray }
+        }
+      },
       {
         $project: {
           title: 1,
@@ -18,4 +27,4 @@ const dashboardListArtworks = async (req, res) => {
   }
 };
 
-export { dashboardListArtworks };
+export { listArtworksByTag };
